@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🌍 Viagem ao Centro da Terra - Jogo Educacional
 
 ## 📖 Sobre
@@ -177,3 +178,7 @@ Este jogo segue os princípios do **Ensino por Investigação** (Sasseron e Carv
 **Desenvolvido para educação científica** 🌍🔬📚
 
 
+=======
+# JogoCentroTerra
+Jogo para disciplina de Mestrado_IandriaOliveira(Contribuição)
+>>>>>>> cd35ae328ada530f9816a42e60ec7e14f5c316e4
