@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viagem ao Centro da Terra - Jogo Educacional BNCC</title>
+    <style>
+        /* Reset e Variáveis */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #FF6347;
+            --text-color: #333;
+            --bg-color: #F5F5F5;
+            --card-bg: #FFFFFF;
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+            --crosta-color: #8B4513;
+            --manto-color: #FF4500;
+            --nucleo-color: #FFD700;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Modo Alto Contraste */
+        .alto-contraste {
+            --text-color: #FFFFFF;
+            --bg-color: #000000;
+            --card-bg: #1A1A1A;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        /* Tamanhos de Fonte */
+        .fonte-pequena { font-size: 14px; }
+        .fonte-media { font-size: 16px; }
+        .fonte-grande { font-size: 20px; }
+
+        /* Container Principal */
+        #game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Telas */
+        .tela {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tela.ativa {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tela Inicial */
+        #menu-inicial {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        #menu-inicial h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        #menu-inicial p {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Botões */
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            background: #357ABD;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:focus {
+            outline: 3px solid var(--warning-color);
+            outline-offset: 2px;
+        }
+
+        .btn-secundario {
+            background: var(--secondary-color);
+        }
+
+        .btn-secundario:hover {
+            background: #E5533A;
+        }
+
+        /* Seleção de Personagem */
+        .personagens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .card-personagem {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+            border: 3px solid transparent;
+        }
+
+        .card-personagem:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .card-personagem.selecionado {
+            border-color: var(--success-color);
+            background: #E8F5E9;
+        }
+
+        .card-personagem .emoji-personagem {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .card-personagem h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .card-personagem p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* HUD do Jogo */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        #hud button {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        #hud button:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Conteúdo da Fase */
+        #conteudo-fase {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .fase-titulo {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .fase-descricao {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #666;
+        }
+
+        /* Elementos Interativos */
+        .elementos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .elemento-interativo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .elemento-interativo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .elemento-interativo .emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .elemento-interativo h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.ativo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-conteudo {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-fechar {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-fechar:hover {
+            background: #cc0000;
+        }
+
+        /* Diário */
+        .diario-abas {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .diario-aba {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        .diario-aba.ativa {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .diario-aba:hover {
+            color: var(--primary-color);
+        }
+
+        .diario-conteudo {
+            min-height: 300px;
+        }
+
+        .amostra-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .amostra-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        /* Quiz */
+        .quiz-pergunta {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .quiz-opcoes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .quiz-opcao {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-opcao:hover {
+            border-color: var(--primary-color);
+            background: #e3f2fd;
+        }
+
+        .quiz-opcao.correta {
+            background: #c8e6c9;
+            border-color: var(--success-color);
+        }
+
+        .quiz-opcao.incorreta {
+            background: #ffcdd2;
+            border-color: #f44336;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .feedback.erro {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .feedback.sucesso {
+            background: #e8f5e9;
+            border-left-color: var(--success-color);
+        }
+
+        /* Barra de Progresso */
+        #barra-progresso {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .progresso-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progresso-bar {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Menu de Opções */
+        .opcoes-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .opcao-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Conquistas */
+        .conquista-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .conquista-item .emoji {
+            font-size: 2em;
+        }
+
+        /* Galeria de Fósseis */
+        .fossil-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .fossil-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .fossil-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .fossil-card .emoji {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        /* Tela Final */
+        .tela-final {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .tela-final h1 {
+            font-size: 3em;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+
+        .certificado {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: var(--shadow);
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            #menu-inicial h1 {
+                font-size: 2em;
+            }
+
+            .personagens-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .elementos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #hud {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Utilitários */
+        .texto-centro {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .escondido {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Tela Inicial -->
+        <div id="menu-inicial" class="tela ativa">
+            <h1>🌍 Viagem ao Centro da Terra</h1>
+            <p>Você é um(a) cientista brasileiro(a) que descobriu uma caverna especial na Chapada Diamantina. Ela vai muito fundo e passa por todas as camadas da Terra! Sua missão é descer, investigar cada camada e documentar tudo que encontrar. Prepare-se para a aventura científica da sua vida!</p>
+            <button class="btn" onclick="mostrarSelecaoPersonagem()">🚀 Iniciar Jogo</button>
+            <button class="btn btn-secundario" onclick="abrirOpcoes()">⚙️ Opções</button>
+            <button class="btn" onclick="carregarJogoSalvo()" id="btn-continuar" style="display: none;">📂 Continuar Jogo</button>
+        </div>
+
+        <!-- Seleção de Personagem -->
+        <div id="selecao-personagem" class="tela">
+            <h2 class="texto-centro mb-20">Escolha seu personagem cientista:</h2>
+            <div class="personagens-grid">
+                <div class="card-personagem" onclick="selecionarPersonagem('joaquim')" tabindex="0" onkeypress="if(event.key==='Enter') selecionarPersonagem('joaquim')">
+                    <div class="emoji-personagem">🧑🏿‍🔬</div>
+                    <h3>Dr. Joaquim Santos</h3>
+                    <p><strong>Geólogo</strong></p>
+                    <p>Especialista em rochas e estruturas geológicas. Apaixonado por descobrir os segredos das camadas da Terra.</p>
+                    <button class="btn mt-20">Escolher</button>
+                </div>
+                <div class="card-personagem" onclick="selecionarPersonagem('dandara')" tabindex="0" onkeypress="if(event.key==='Enter') selecionarPersonagem('dandara')">
+                    <div class="emoji-personagem">👩🏿‍🔬</div>
+                    <h3>Dra. Dandara Costa</h3>
+                    <p><strong>Paleontóloga</strong></p>
+                    <p>Especialista em fósseis e vida antiga. Fascinada pelos seres que viveram há milhões de anos na América do Sul.</p>
+                    <button class="btn mt-20">Escolher</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela do Jogo -->
+        <div id="jogo" class="tela">
+            <header id="hud">
+                <div>
+                    <span id="info-personagem"></span> | 
+                    <span id="fase-atual"></span>
+                </div>
+                <div>
+                    <button onclick="abrirDiario()" tabindex="0">📖 Diário</button>
+                    <button onclick="abrirOpcoes()" tabindex="0">☰ Menu</button>
+                </div>
+            </header>
+
+            <main id="conteudo-fase">
+                <!-- Conteúdo dinâmico -->
+            </main>
+
+            <footer id="barra-progresso">
+                <div class="progresso-container">
+                    <div class="progresso-bar" id="progresso-bar">0%</div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Modal do Diário -->
+        <div id="modal-diario" class="modal" tabindex="-1">
+            <div class="modal-conteudo">
+                <button class="modal-fechar" onclick="fecharDiario()" aria-label="Fechar">×</button>
+                <h2>📖 Diário Científico</h2>
+                <div class="diario-abas">
+                    <button class="diario-aba ativa" onclick="mostrarAbaDiario('descobertas')">📝 Descobertas</button>
+                    <button class="diario-aba" onclick="mostrarAbaDiario('amostras')">🔬 Amostras</button>
+                    <button class="diario-aba" onclick="mostrarAbaDiario('mapa')">🗺️ Mapa</button>
+                    <button class="diario-aba" onclick="mostrarAbaDiario('glossario')">📚 Glossário</button>
+                </div>
+                <div class="diario-conteudo" id="diario-conteudo">
+                    <!-- Conteúdo dinâmico -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Quiz/Validação -->
+        <div id="modal-quiz" class="modal" tabindex="-1">
+            <div class="modal-conteudo">
+                <button class="modal-fechar" onclick="fecharQuiz()" aria-label="Fechar">×</button>
+                <div id="quiz-conteudo">
+                    <!-- Conteúdo dinâmico -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Opções -->
+        <div id="modal-opcoes" class="modal" tabindex="-1">
+            <div class="modal-conteudo">
+                <button class="modal-fechar" onclick="fecharOpcoes()" aria-label="Fechar">×</button>
+                <h2>⚙️ Opções</h2>
+                <div class="opcoes-grid">
+                    <div class="opcao-item">
+                        <div>
+                            <strong>Alto Contraste</strong>
+                            <p>Melhora a visibilidade</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-contraste" onchange="toggleAltoContraste()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="opcao-item">
+                        <div>
+                            <strong>Tamanho da Fonte</strong>
+                            <p>Ajuste o tamanho do texto</p>
+                        </div>
+                        <div>
+                            <button class="btn" onclick="ajustarFonte('pequena')">A-</button>
+                            <button class="btn" onclick="ajustarFonte('media')">A</button>
+                            <button class="btn" onclick="ajustarFonte('grande')">A+</button>
+                        </div>
+                    </div>
+                    <div class="opcao-item">
+                        <div>
+                            <strong>Recomeçar Jogo</strong>
+                            <p>Apaga o progresso salvo</p>
+                        </div>
+                        <button class="btn btn-secundario" onclick="recomecarJogo()">🔄 Recomeçar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado do Jogo
+        let jogo = {
+            personagem: null,
+            faseAtual: 1,
+            fasesCompletas: [],
+            amostras: [],
+            fosseis: [],
+            conquistas: [],
+            progresso: 0,
+            elementosInvestigados: []
+        };
+
+        // Dados Científicos
+        const personagens = {
+            joaquim: {
+                nome: "Dr. Joaquim Santos",
+                profissao: "Geólogo",
+                emoji: "🧑🏿‍🔬"
+            },
+            dandara: {
+                nome: "Dra. Dandara Costa",
+                profissao: "Paleontóloga",
+                emoji: "👩🏿‍🔬"
+            }
+        };
+
+        const camadasTerra = {
+            1: {
+                nome: "Crosta Terrestre",
+                descricao: "A camada mais externa e fina da Terra, onde vivemos. É formada por rochas, solo e minerais.",
+                temperatura: "15°C a 400°C",
+                profundidade: "5-70 km",
+                cor: "#8B4513",
+                elementos: [
+                    { id: "rocha-sedimentar", nome: "Rocha Sedimentar", emoji: "🪨", info: "Rocha formada pelo acúmulo de sedimentos ao longo de milhões de anos. É a ÚNICA rocha que pode conter fósseis!" },
+                    { id: "fossil-glossopteris", nome: "Fóssil de Glossopteris", emoji: "🍃", info: "Folha fóssil de planta antiga que prova que os continentes estavam unidos no passado. Encontrado no Brasil!" },
+                    { id: "fossil-staurikosaurus", nome: "Fóssil de Staurikosaurus", emoji: "🦕", info: "Um dos dinossauros mais antigos do mundo! Era pequeno, carnívoro e viveu no que hoje é o Rio Grande do Sul, Brasil." },
+                    { id: "fossil-santanaraptor", nome: "Fóssil de Santanaraptor", emoji: "🦖", info: "Dinossauro carnívoro encontrado no Brasil! Tinha penas e era parente do famoso Velociraptor. Encontrado no Ceará!" },
+                    { id: "fossil-mesosaurus", nome: "Fóssil de Mesosaurus", emoji: "🐊", info: "Réptil aquático que viveu quando a América do Sul e África estavam unidas. Prova a deriva continental!" },
+                    { id: "fossil-pterossauros", nome: "Fóssil de Pterossauros", emoji: "🦅", info: "Répteis voadores que dominaram os céus! O Brasil tem alguns dos melhores fósseis de pterossauros do mundo, especialmente no Ceará." },
+                    { id: "fossil-trilobitas", nome: "Fóssil de Trilobitas", emoji: "🦀", info: "Bichos marinhos muito antigos, extintos há 250 milhões de anos. Foram muito importantes na evolução da vida!" },
+                    { id: "fossil-amonites", nome: "Fóssil de Amonites", emoji: "🐚", info: "Moluscos extintos em formato de espiral. Muito comuns em rochas sedimentares!" },
+                    { id: "solo", nome: "Solo e Minerais", emoji: "🔨", info: "O solo é formado pela decomposição de rochas e matéria orgânica. É essencial para a vida na Terra." },
+                    { id: "placa", nome: "Placa Informativa", emoji: "📊", info: "A crosta continental é mais espessa (até 70km) e forma os continentes. A crosta oceânica é mais fina (5-10km) e está sob os oceanos." }
+                ],
+                rochas: ["sedimentar"],
+                fosseis: ["glossopteris", "staurikosaurus", "santanaraptor", "mesosaurus", "pterossauros", "trilobitas", "amonites"]
+            },
+            2: {
+                nome: "Manto Superior",
+                descricao: "Camada intermediária onde rochas sofrem transformações devido ao calor e pressão intensos.",
+                temperatura: "1.000°C a 2.000°C",
+                profundidade: "70-700 km",
+                cor: "#FF6347",
+                elementos: [
+                    { id: "temperatura", nome: "Indicador de Temperatura", emoji: "🌡️", info: "A temperatura aumenta drasticamente! Aqui faz mais de 1.000°C. O calor transforma as rochas." },
+                    { id: "marmore", nome: "Mármore", emoji: "🪨", info: "Rocha metamórfica! Era calcário, mas o calor e pressão a transformaram em mármore. Não derreteu, apenas mudou de forma." },
+                    { id: "ardosia", nome: "Ardósia", emoji: "🪨", info: "Rocha metamórfica formada a partir da argila. Usada para fazer telhas e lousas." },
+                    { id: "pressao", nome: "Gráfico de Pressão", emoji: "📈", info: "A pressão aqui é enorme! Milhares de vezes maior que na superfície. Isso, junto com o calor, transforma rochas em rochas metamórficas." }
+                ],
+                rochas: ["marmore", "ardosia"]
+            },
+            3: {
+                nome: "Manto Inferior",
+                descricao: "Zona de magma em movimento que causa terremotos, vulcões e forma rochas magmáticas.",
+                temperatura: "2.000°C a 3.700°C",
+                profundidade: "700-2.900 km",
+                cor: "#FF4500",
+                elementos: [
+                    { id: "magma", nome: "Magma em Movimento", emoji: "🌋", info: "O magma é rocha derretida que se move lentamente. Esse movimento causa as placas tectônicas a se moverem!" },
+                    { id: "rocha-magmatica", nome: "Rochas Magmáticas", emoji: "🪨", info: "Quando o magma esfria e endurece, forma rochas magmáticas (ou ígneas). Exemplos: granito e basalto." },
+                    { id: "tectonica", nome: "Simulação de Tectônica", emoji: "🌍", info: "O movimento do magma empurra as placas tectônicas, causando terremotos e vulcões na superfície!" },
+                    { id: "termometro", nome: "Termômetro Extremo", emoji: "🌡️", info: "Aqui a temperatura pode chegar a 3.700°C! Quase tão quente quanto a superfície do Sol!" }
+                ],
+                rochas: ["granito", "basalto"]
+            },
+            4: {
+                nome: "Núcleo Externo",
+                descricao: "Camada de metal líquido (ferro e níquel) que cria o campo magnético da Terra.",
+                temperatura: "4.000°C a 5.000°C",
+                profundidade: "2.900-5.100 km",
+                cor: "#FFD700",
+                elementos: [
+                    { id: "campo-magnetico", nome: "Campo Magnético", emoji: "🧲", info: "O movimento do metal líquido cria o campo magnético da Terra, que nos protege dos ventos solares perigosos!" },
+                    { id: "metal-liquido", nome: "Metal Líquido", emoji: "🌊", info: "Aqui há ferro e níquel derretidos, movendo-se constantemente. É como um oceano de metal líquido!" },
+                    { id: "protecao-solar", nome: "Proteção Solar", emoji: "☀️", info: "O campo magnético desvia partículas perigosas do Sol, protegendo toda a vida na Terra!" },
+                    { id: "temp-extrema", nome: "Temperatura Extrema", emoji: "🌡️", info: "A temperatura aqui é de 4.000°C a 5.000°C! Mais quente que a superfície do Sol!" }
+                ],
+                rochas: []
+            },
+            5: {
+                nome: "Núcleo Interno",
+                descricao: "O centro sólido da Terra, formado por ferro e níquel sob pressão extrema.",
+                temperatura: "5.000°C a 6.000°C",
+                profundidade: "5.100-6.371 km",
+                cor: "#C0C0C0",
+                elementos: [
+                    { id: "nucleo-solido", nome: "Núcleo Sólido", emoji: "💎", info: "Apesar de estar a 6.000°C, o núcleo interno é SÓLIDO! A pressão extrema mantém o metal sólido." },
+                    { id: "pressao-extrema", nome: "Pressão Extrema", emoji: "⚖️", info: "A pressão aqui é milhões de vezes maior que na superfície! É isso que mantém o núcleo sólido mesmo tão quente." },
+                    { id: "temp-maxima", nome: "Temperatura Máxima", emoji: "🔥", info: "6.000°C! A temperatura mais alta do planeta. Mais quente que a superfície do Sol!" },
+                    { id: "revisao", nome: "Revisão Completa", emoji: "🌍", info: "Parabéns! Você chegou ao centro da Terra! Revise tudo que aprendeu sobre as camadas, rochas e fósseis." }
+                ],
+                rochas: []
+            }
+        };
+
+        const tiposRochas = {
+            sedimentar: {
+                nome: "Rocha Sedimentar",
+                formacao: "Formada pelo acúmulo e compactação de sedimentos ao longo de milhões de anos",
+                exemplos: ["Calcário", "Arenito", "Carvão"],
+                temFosseis: true,
+                emoji: "🪨"
+            },
+            metamorfica: {
+                nome: "Rocha Metamórfica",
+                formacao: "Formada quando outras rochas sofrem transformações por calor e pressão intensos",
+                exemplos: ["Mármore (era calcário)", "Ardósia (era argila)", "Gnaisse (era granito)"],
+                temFosseis: false,
+                emoji: "🪨"
+            },
+            magmatica: {
+                nome: "Rocha Magmática (Ígnea)",
+                formacao: "Formada quando o magma esfria e endurece",
+                exemplos: ["Granito", "Basalto"],
+                temFosseis: false,
+                emoji: "🪨"
+            }
+        };
+
+        const fosseisSulAmericanos = [
+            {
+                nome: "Glossopteris",
+                tipo: "Planta",
+                periodo: "Permiano (299-252 milhões de anos)",
+                local: "Brasil, Argentina",
+                info: "Folha fóssil que prova que os continentes estavam unidos. Foi encontrada na América do Sul, África, Índia e Antártida!",
+                emoji: "🍃"
+            },
+            {
+                nome: "Staurikosaurus",
+                tipo: "Dinossauro",
+                periodo: "Triássico (233-225 milhões de anos)",
+                local: "Rio Grande do Sul, Brasil",
+                info: "Um dos dinossauros mais antigos do mundo! Era pequeno, carnívoro e viveu no que hoje é o Brasil.",
+                emoji: "🦕"
+            },
+            {
+                nome: "Santanaraptor",
+                tipo: "Dinossauro",
+                periodo: "Cretáceo (112-100 milhões de anos)",
+                local: "Ceará, Brasil",
+                info: "Dinossauro carnívoro encontrado no Brasil! Tinha penas e era parente do famoso Velociraptor.",
+                emoji: "🦖"
+            },
+            {
+                nome: "Mesosaurus",
+                tipo: "Réptil Aquático",
+                periodo: "Permiano (299-252 milhões de anos)",
+                local: "Brasil, África do Sul",
+                info: "Réptil aquático que viveu quando a América do Sul e África estavam unidas. Prova a deriva continental!",
+                emoji: "🐊"
+            },
+            {
+                nome: "Pterossauros",
+                tipo: "Réptil Voador",
+                periodo: "Triássico ao Cretáceo",
+                local: "Brasil (especialmente Ceará)",
+                info: "Répteis voadores que dominaram os céus! O Brasil tem alguns dos melhores fósseis de pterossauros do mundo.",
+                emoji: "🦅"
+            },
+            {
+                nome: "Trilobitas",
+                tipo: "Artrópode Marinho",
+                periodo: "Cambriano ao Permiano",
+                local: "América do Sul",
+                info: "Bichos marinhos muito antigos, extintos há 250 milhões de anos. Foram muito importantes na evolução da vida!",
+                emoji: "🦀"
+            },
+            {
+                nome: "Amonites",
+                tipo: "Molusco",
+                periodo: "Devoniano ao Cretáceo",
+                local: "América do Sul",
+                info: "Moluscos extintos em formato de espiral. Muito comuns em rochas sedimentares!",
+                emoji: "🐚"
+            }
+        ];
+
+        // Quizzes por Fase
+        const quizzes = {
+            1: {
+                pergunta: "Por que esta rocha tem camadas?",
+                opcoes: [
+                    { texto: "Porque esfriou rápido", correta: false },
+                    { texto: "Porque foi se acumulando aos poucos", correta: true },
+                    { texto: "Porque foi derretida", correta: false }
+                ],
+                feedback: "Correto! Rochas sedimentares se formam quando sedimentos (pedaços de rochas, restos de seres vivos) se acumulam em camadas ao longo de milhões de anos e são prensados.",
+                validacao: {
+                    pergunta: "Complete: A crosta é a camada mais _____ da Terra",
+                    resposta: "externa"
+                }
+            },
+            2: {
+                pergunta: "O que acontece quando rochas sofrem calor e pressão?",
+                opcoes: [
+                    { texto: "Elas derretem completamente", correta: false },
+                    { texto: "Elas se transformam em rochas metamórficas", correta: true },
+                    { texto: "Elas viram fósseis", correta: false }
+                ],
+                feedback: "Perfeito! Rochas metamórficas se formam quando outras rochas sofrem transformações por calor e pressão, mas NÃO derretem - apenas mudam de forma e estrutura.",
+                validacao: {
+                    pergunta: "Rochas metamórficas se formam por:",
+                    resposta: "calor e pressão"
+                }
+            },
+            3: {
+                pergunta: "Como o magma afeta a superfície da Terra?",
+                opcoes: [
+                    { texto: "Não afeta", correta: false },
+                    { texto: "Causa terremotos e vulcões ao mover placas tectônicas", correta: true },
+                    { texto: "Cria fósseis", correta: false }
+                ],
+                feedback: "Excelente! O movimento do magma no manto empurra as placas tectônicas, causando terremotos, vulcões e formando montanhas!",
+                validacao: {
+                    pergunta: "Rochas magmáticas se formam quando:",
+                    resposta: "o magma esfria"
+                }
+            },
+            4: {
+                pergunta: "O que o campo magnético da Terra faz?",
+                opcoes: [
+                    { texto: "Nada importante", correta: false },
+                    { texto: "Protege a Terra dos ventos solares perigosos", correta: true },
+                    { texto: "Cria fósseis", correta: false }
+                ],
+                feedback: "Muito bem! O campo magnético é essencial para a vida na Terra, pois desvia partículas perigosas do Sol que poderiam destruir nossa atmosfera!",
+                validacao: {
+                    pergunta: "O campo magnético protege a Terra de:",
+                    resposta: "ventos solares"
+                }
+            },
+            5: {
+                pergunta: "Por que o núcleo interno é sólido se está tão quente?",
+                opcoes: [
+                    { texto: "Porque é feito de material diferente", correta: false },
+                    { texto: "Porque a pressão extrema mantém sólido", correta: true },
+                    { texto: "Porque não está quente", correta: false }
+                ],
+                feedback: "Perfeito! A pressão extrema no centro da Terra é milhões de vezes maior que na superfície, mantendo o metal sólido mesmo a 6.000°C!",
+                validacao: {
+                    pergunta: "O núcleo interno é sólido devido à:",
+                    resposta: "pressão extrema"
+                }
+            }
+        };
+
+        // Funções de Navegação
+        function mostrarSelecaoPersonagem() {
+            document.getElementById('menu-inicial').classList.remove('ativa');
+            document.getElementById('selecao-personagem').classList.add('ativa');
+        }
+
+        function selecionarPersonagem(personagem) {
+            jogo.personagem = personagem;
+            document.getElementById('selecao-personagem').classList.remove('ativa');
+            document.getElementById('jogo').classList.add('ativa');
+            atualizarHUD();
+            mostrarFase(1);
+            salvarProgresso();
+        }
+
+        function atualizarHUD() {
+            const personagem = personagens[jogo.personagem];
+            document.getElementById('info-personagem').textContent = `${personagem.emoji} ${personagem.nome}`;
+            document.getElementById('fase-atual').textContent = `Fase ${jogo.faseAtual}: ${camadasTerra[jogo.faseAtual].nome}`;
+        }
+
+        function mostrarFase(numeroFase) {
+            jogo.faseAtual = numeroFase;
+            const fase = camadasTerra[numeroFase];
+            atualizarHUD();
+            
+            let html = `
+                <h2 class="fase-titulo">${fase.nome}</h2>
+                <p class="fase-descricao">${fase.descricao}</p>
+                <div style="text-align: center; margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                    <strong>🌡️ Temperatura:</strong> ${fase.temperatura} | 
+                    <strong>📏 Profundidade:</strong> ${fase.profundidade}
+                </div>
+                <h3 style="text-align: center; margin: 30px 0 20px 0;">Clique nos elementos para investigar:</h3>
+                <div class="elementos-grid">
+            `;
+
+            fase.elementos.forEach(elemento => {
+                const investigado = jogo.elementosInvestigados.includes(elemento.id);
+                html += `
+                    <div class="elemento-interativo" 
+                         onclick="investigarElemento('${elemento.id}', '${fase.nome}')"
+                         style="background: ${investigado ? 'linear-gradient(135deg, #28A745 0%, #20C997 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};"
+                         tabindex="0"
+                         onkeypress="if(event.key==='Enter') investigarElemento('${elemento.id}', '${fase.nome}')">
+                        <div class="emoji">${elemento.emoji}</div>
+                        <h4>${elemento.nome}</h4>
+                        ${investigado ? '<p style="font-size: 0.9em; margin-top: 10px;">✓ Investigado</p>' : '<p style="font-size: 0.9em; margin-top: 10px;">Clique para investigar</p>'}
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            // Botões de ação
+            html += `
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="iniciarDesafioFase(${numeroFase})">🎯 Fazer Desafio da Fase</button>
+                    ${numeroFase < 5 ? `<button class="btn btn-secundario" onclick="proximaFase()" id="btn-proxima-fase-${numeroFase}" style="display: none;">➡️ Próxima Fase</button>` : ''}
+                    ${numeroFase === 5 ? `<button class="btn btn-secundario" onclick="mostrarQuizFinal()" id="btn-quiz-final" style="display: none;">🏆 Quiz Final</button>` : ''}
+                </div>
+            `;
+
+            document.getElementById('conteudo-fase').innerHTML = html;
+            atualizarProgresso();
+        }
+
+        function elementoEColetavel(idElemento) {
+            // Verifica se o elemento é uma rocha ou fóssil coletável
+            return idElemento.includes('fossil') || 
+                   idElemento.includes('rocha') || 
+                   idElemento.includes('marmore') || 
+                   idElemento.includes('ardosia') || 
+                   idElemento.includes('magmatica') || 
+                   idElemento.includes('granito') || 
+                   idElemento.includes('basalto');
+        }
+
+        function investigarElemento(idElemento, nomeFase) {
+            const fase = camadasTerra[jogo.faseAtual];
+            const elemento = fase.elementos.find(e => e.id === idElemento);
+            
+            if (!elemento) return;
+
+            if (!jogo.elementosInvestigados.includes(idElemento)) {
+                jogo.elementosInvestigados.push(idElemento);
+            }
+
+            // Mostrar informação em modal
+            const modal = document.getElementById('modal-quiz');
+            const conteudo = document.getElementById('quiz-conteudo');
+            
+            const podeColetar = elementoEColetavel(idElemento);
+            
+            conteudo.innerHTML = `
+                <h2>${elemento.emoji} ${elemento.nome}</h2>
+                <div class="feedback">
+                    <p style="font-size: 1.1em;">${elemento.info}</p>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="fecharQuiz()">Fechar</button>
+                    ${podeColetar ? 
+                        `<button class="btn btn-secundario" onclick="coletarItem('${idElemento}', '${nomeFase}')">🔬 Coletar Amostra</button>` : ''}
+                </div>
+            `;
+            
+            modal.classList.add('ativo');
+            salvarProgresso();
+            mostrarFase(jogo.faseAtual); // Atualizar visual
+        }
+
+        function coletarItem(idElemento, nomeFase) {
+            const fase = camadasTerra[jogo.faseAtual];
+            
+            // Verificar se é rocha ou fóssil
+            if (idElemento.includes('fossil')) {
+                const fossil = fosseisSulAmericanos.find(f => 
+                    idElemento.toLowerCase().includes(f.nome.toLowerCase().split(' ')[0].toLowerCase())
+                );
+                if (fossil && !jogo.fosseis.find(f => f.nome === fossil.nome)) {
+                    jogo.fosseis.push(fossil);
+                    mostrarFeedback("Fóssil coletado! " + fossil.nome + " foi adicionado ao seu diário.");
+                }
+            } else if (idElemento.includes('rocha') || idElemento.includes('marmore') || idElemento.includes('ardosia') || 
+                       idElemento.includes('magmatica') || idElemento.includes('granito') || idElemento.includes('basalto')) {
+                let tipoRocha = 'sedimentar';
+                if (idElemento.includes('marmore') || idElemento.includes('ardosia')) {
+                    tipoRocha = 'metamorfica';
+                } else if (idElemento.includes('magmatica') || idElemento.includes('granito') || idElemento.includes('basalto')) {
+                    tipoRocha = 'magmatica';
+                }
+                
+                const rocha = tiposRochas[tipoRocha];
+                if (rocha && !jogo.amostras.find(a => a.nome === rocha.nome)) {
+                    jogo.amostras.push(rocha);
+                    mostrarFeedback("Amostra coletada! " + rocha.nome + " foi adicionada ao seu diário.");
+                }
+            }
+            
+            fecharQuiz();
+            salvarProgresso();
+            atualizarDiario();
+        }
+
+        function mostrarFeedback(mensagem) {
+            const feedback = document.createElement('div');
+            feedback.className = 'feedback sucesso';
+            feedback.style.position = 'fixed';
+            feedback.style.top = '20px';
+            feedback.style.right = '20px';
+            feedback.style.zIndex = '2000';
+            feedback.style.padding = '20px';
+            feedback.style.borderRadius = '8px';
+            feedback.style.boxShadow = '0 4px 6px rgba(0,0,0,0.2)';
+            feedback.textContent = mensagem;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.remove();
+            }, 3000);
+        }
+
+        function iniciarDesafioFase(numeroFase) {
+            const quiz = quizzes[numeroFase];
+            if (!quiz) return;
+
+            const modal = document.getElementById('modal-quiz');
+            const conteudo = document.getElementById('quiz-conteudo');
+            
+            let html = `
+                <h2>🎯 Desafio da Fase ${numeroFase}</h2>
+                <div class="quiz-pergunta">${quiz.pergunta}</div>
+                <div class="quiz-opcoes">
+            `;
+
+            quiz.opcoes.forEach((opcao, index) => {
+                html += `
+                    <div class="quiz-opcao" onclick="responderQuiz(${numeroFase}, ${index})" tabindex="0" onkeypress="if(event.key==='Enter') responderQuiz(${numeroFase}, ${index})">
+                        ${opcao.texto}
+                    </div>
+                `;
+            });
+
+            html += `</div><div id="quiz-feedback"></div>`;
+            conteudo.innerHTML = html;
+            modal.classList.add('ativo');
+        }
+
+        function responderQuiz(numeroFase, indexOpcao) {
+            const quiz = quizzes[numeroFase];
+            const opcao = quiz.opcoes[indexOpcao];
+            const feedbackDiv = document.getElementById('quiz-feedback');
+            const opcoes = document.querySelectorAll('.quiz-opcao');
+            
+            opcoes.forEach((op, index) => {
+                op.style.pointerEvents = 'none';
+                if (quiz.opcoes[index].correta) {
+                    op.classList.add('correta');
+                } else if (index === indexOpcao && !opcao.correta) {
+                    op.classList.add('incorreta');
+                }
+            });
+
+            if (opcao.correta) {
+                feedbackDiv.innerHTML = `
+                    <div class="feedback sucesso">
+                        <strong>🎉 Parabéns!</strong><br>
+                        ${quiz.feedback}
+                        <div style="margin-top: 15px;">
+                            <button class="btn" onclick="validarConhecimento(${numeroFase})">➡️ Continuar</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                feedbackDiv.innerHTML = `
+                    <div class="feedback erro">
+                        <strong>Quase lá!</strong><br>
+                        Tente novamente. Lembre-se: ${quiz.feedback.split('.')[0]}.
+                        <div style="margin-top: 15px;">
+                            <button class="btn" onclick="fecharQuiz(); iniciarDesafioFase(${numeroFase})">🔄 Tentar Novamente</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function validarConhecimento(numeroFase) {
+            const quiz = quizzes[numeroFase];
+            const validacao = quiz.validacao;
+            
+            const resposta = prompt(validacao.pergunta + "\n\n(Digite sua resposta):");
+            
+            if (resposta && resposta.toLowerCase().includes(validacao.resposta.toLowerCase())) {
+                alert("🎉 Excelente! Você compreendeu o conceito!");
+                fecharQuiz();
+                
+                if (!jogo.fasesCompletas.includes(numeroFase)) {
+                    jogo.fasesCompletas.push(numeroFase);
+                }
+                
+                // Mostrar botão de próxima fase
+                if (numeroFase < 5) {
+                    document.getElementById(`btn-proxima-fase-${numeroFase}`).style.display = 'inline-block';
+                } else {
+                    document.getElementById('btn-quiz-final').style.display = 'inline-block';
+                }
+                
+                adicionarConquista(`Fase ${numeroFase} Completa!`);
+                salvarProgresso();
+                atualizarProgresso();
+            } else {
+                alert("Tente novamente! A resposta contém: '" + validacao.resposta + "'");
+            }
+        }
+
+        function proximaFase() {
+            if (jogo.faseAtual < 5) {
+                jogo.faseAtual++;
+                mostrarFase(jogo.faseAtual);
+            } else {
+                mostrarQuizFinal();
+            }
+        }
+
+        function mostrarQuizFinal() {
+            const perguntasOriginais = [
+                { pergunta: "Qual é a camada mais externa da Terra?", opcoes: ["Crosta", "Manto", "Núcleo"], correta: 0 },
+                { pergunta: "Qual tipo de rocha pode conter fósseis?", opcoes: ["Magmática", "Sedimentar", "Metamórfica"], correta: 1 },
+                { pergunta: "Como se formam rochas metamórficas?", opcoes: ["Magma esfria", "Calor e pressão", "Acúmulo de sedimentos"], correta: 1 },
+                { pergunta: "O que o campo magnético da Terra faz?", opcoes: ["Nada", "Protege dos ventos solares", "Cria fósseis"], correta: 1 },
+                { pergunta: "Por que o núcleo interno é sólido?", opcoes: ["Não está quente", "Pressão extrema", "É feito de gelo"], correta: 1 },
+                { pergunta: "Onde o Staurikosaurus foi encontrado?", opcoes: ["Ceará", "Rio Grande do Sul", "São Paulo"], correta: 1 },
+                { pergunta: "Qual fóssil prova que continentes estavam unidos?", opcoes: ["Staurikosaurus", "Glossopteris", "Trilobitas"], correta: 1 },
+                { pergunta: "Qual a temperatura aproximada do núcleo interno?", opcoes: ["1.000°C", "3.000°C", "6.000°C"], correta: 2 },
+                { pergunta: "O movimento do magma causa:", opcoes: ["Fósseis", "Terremotos e vulcões", "Campo magnético"], correta: 1 },
+                { pergunta: "Rochas magmáticas se formam quando:", opcoes: ["Sedimentos se acumulam", "Magma esfria", "Rochas sofrem pressão"], correta: 1 }
+            ];
+
+            // Função para embaralhar array (Fisher-Yates)
+            function embaralharArray(array) {
+                const novoArray = [...array];
+                for (let i = novoArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [novoArray[i], novoArray[j]] = [novoArray[j], novoArray[i]];
+                }
+                return novoArray;
+            }
+
+            // Embaralhar opções de cada pergunta e ajustar índice correto
+            const perguntas = perguntasOriginais.map(pergunta => {
+                const respostaCorreta = pergunta.opcoes[pergunta.correta];
+                const opcoesEmbaralhadas = embaralharArray(pergunta.opcoes);
+                const novoIndiceCorreto = opcoesEmbaralhadas.indexOf(respostaCorreta);
+                
+                return {
+                    pergunta: pergunta.pergunta,
+                    opcoes: opcoesEmbaralhadas,
+                    correta: novoIndiceCorreto
+                };
+            });
+
+            let html = `<h2>🏆 Quiz Final - Teste Seu Conhecimento!</h2>`;
+            let acertos = 0;
+            let total = perguntas.length;
+
+            perguntas.forEach((pergunta, index) => {
+                html += `
+                    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <strong>${index + 1}. ${pergunta.pergunta}</strong>
+                        <div class="quiz-opcoes" style="margin-top: 10px;">
+                `;
+                pergunta.opcoes.forEach((opcao, opIndex) => {
+                    html += `
+                        <div class="quiz-opcao" onclick="responderQuizFinal(${index}, ${opIndex}, ${pergunta.correta})">
+                            ${opcao}
+                        </div>
+                    `;
+                });
+                html += `</div><div id="feedback-${index}"></div></div>`;
+            });
+
+            html += `
+                <div id="resultado-final" style="display: none; text-align: center; margin-top: 30px;">
+                    <h2 id="nota-final"></h2>
+                    <button class="btn" onclick="mostrarTelaFinal()">🎉 Ver Certificado</button>
+                </div>
+            `;
+
+            const modal = document.getElementById('modal-quiz');
+            const conteudo = document.getElementById('quiz-conteudo');
+            conteudo.innerHTML = html;
+            modal.classList.add('ativo');
+
+            window.responderQuizFinal = function(perguntaIndex, opcaoIndex, correta) {
+                const feedbackDiv = document.getElementById(`feedback-${perguntaIndex}`);
+                if (!feedbackDiv) return;
+                
+                // Verificar se já foi respondida (evitar múltiplos cliques)
+                if (feedbackDiv.innerHTML.trim() !== '') return;
+                
+                // Encontrar o container da pergunta (parent do feedbackDiv)
+                const containerPergunta = feedbackDiv.parentElement;
+                // Encontrar as opções dentro do container
+                const todasOpcoes = containerPergunta.querySelectorAll('.quiz-opcao');
+                
+                // Desabilitar cliques e marcar respostas
+                todasOpcoes.forEach((op, idx) => {
+                    op.style.pointerEvents = 'none';
+                    if (idx === correta) {
+                        op.classList.add('correta');
+                    } else if (idx === opcaoIndex && idx !== correta) {
+                        op.classList.add('incorreta');
+                    }
+                });
+
+                if (opcaoIndex === correta) {
+                    acertos++;
+                    feedbackDiv.innerHTML = '<div class="feedback sucesso">✓ Correto!</div>';
+                } else {
+                    feedbackDiv.innerHTML = '<div class="feedback erro">✗ Incorreto. A resposta correta está destacada em verde.</div>';
+                }
+
+                // Verificar se todas foram respondidas
+                setTimeout(() => {
+                    // Verificar se todos os feedbacks têm conteúdo (foram respondidos)
+                    let todasRespondidas = true;
+                    for (let i = 0; i < perguntas.length; i++) {
+                        const fb = document.getElementById(`feedback-${i}`);
+                        if (!fb || fb.innerHTML.trim() === '') {
+                            todasRespondidas = false;
+                            break;
+                        }
+                    }
+                    
+                    if (todasRespondidas) {
+                        const resultado = document.getElementById('resultado-final');
+                        const nota = document.getElementById('nota-final');
+                        if (resultado && nota) {
+                            resultado.style.display = 'block';
+                            const porcentagem = Math.round((acertos / total) * 100);
+                            nota.textContent = `Você acertou ${acertos} de ${total} questões (${porcentagem}%)!`;
+                            
+                            if (porcentagem >= 70) {
+                                nota.style.color = 'var(--success-color)';
+                            } else {
+                                nota.style.color = 'var(--warning-color)';
+                            }
+                        }
+                    }
+                }, 100);
+            };
+        }
+
+        function mostrarTelaFinal() {
+            fecharQuiz();
+            document.getElementById('jogo').classList.remove('ativa');
+            
+            const telaFinal = document.createElement('div');
+            telaFinal.className = 'tela ativa';
+            telaFinal.id = 'tela-final';
+            telaFinal.innerHTML = `
+                <div class="tela-final">
+                    <h1>🎉 Parabéns, Cientista!</h1>
+                    <p style="font-size: 1.2em; margin-bottom: 30px;">Você completou sua viagem ao centro da Terra!</p>
+                    
+                    <div class="certificado">
+                        <h2>🏅 Certificado de Conclusão</h2>
+                        <p style="font-size: 1.3em; margin: 20px 0;">
+                            ${personagens[jogo.personagem].nome}
+                        </p>
+                        <p>Completou com sucesso a investigação científica das camadas da Terra, tipos de rochas e fósseis sul-americanos.</p>
+                        <p style="margin-top: 20px; font-size: 0.9em;">Habilidades desenvolvidas: EF06CI11 e EF06CI12 (BNCC)</p>
+                    </div>
+
+                    <div style="margin: 40px 0;">
+                        <h3>📊 Seu Progresso:</h3>
+                        <p>✅ Fases completas: ${jogo.fasesCompletas.length}/5</p>
+                        <p>🔬 Amostras coletadas: ${jogo.amostras.length}</p>
+                        <p>🦕 Fósseis descobertos: ${jogo.fosseis.length}</p>
+                        <p>🏆 Conquistas: ${jogo.conquistas.length}</p>
+                    </div>
+
+                    <div style="margin: 40px 0;">
+                        <button class="btn" onclick="mostrarGaleriaFosseis()">🦕 Galeria de Fósseis</button>
+                        <button class="btn btn-secundario" onclick="recomecarJogo()">🔄 Jogar Novamente</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('game-container').appendChild(telaFinal);
+            adicionarConquista("Cientista Completo!");
+        }
+
+        function mostrarGaleriaFosseis() {
+            const modal = document.getElementById('modal-quiz');
+            const conteudo = document.getElementById('quiz-conteudo');
+            
+            let html = `
+                <h2>🦕 Galeria de Fósseis Sul-Americanos</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Explore os fósseis encontrados na América do Sul!</p>
+                <div class="fossil-grid">
+            `;
+
+            fosseisSulAmericanos.forEach(fossil => {
+                const descoberto = jogo.fosseis.find(f => f.nome === fossil.nome);
+                html += `
+                    <div class="fossil-card" style="border: ${descoberto ? '3px solid var(--success-color)' : '1px solid #ddd'};">
+                        <div class="emoji">${fossil.emoji}</div>
+                        <h3>${fossil.nome}</h3>
+                        <p><strong>Tipo:</strong> ${fossil.tipo}</p>
+                        <p><strong>Período:</strong> ${fossil.periodo}</p>
+                        <p><strong>Local:</strong> ${fossil.local}</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">${fossil.info}</p>
+                        ${descoberto ? '<p style="color: var(--success-color); margin-top: 10px;">✓ Descoberto!</p>' : ''}
+                    </div>
+                `;
+            });
+
+            html += `</div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="fecharQuiz()">Fechar</button>
+                </div>
+            `;
+
+            conteudo.innerHTML = html;
+            modal.classList.add('ativo');
+        }
+
+        // Sistema de Diário
+        function abrirDiario() {
+            atualizarDiario();
+            document.getElementById('modal-diario').classList.add('ativo');
+        }
+
+        function fecharDiario() {
+            document.getElementById('modal-diario').classList.remove('ativo');
+        }
+
+        function mostrarAbaDiario(aba) {
+            document.querySelectorAll('.diario-aba').forEach(a => a.classList.remove('ativa'));
+            event.target.classList.add('ativa');
+            atualizarDiario(aba);
+        }
+
+        function atualizarDiario(abaAtiva = 'descobertas') {
+            const conteudo = document.getElementById('diario-conteudo');
+            
+            if (abaAtiva === 'descobertas') {
+                let html = '<h3>📝 Minhas Descobertas</h3>';
+                html += `<p><strong>Fases Completas:</strong> ${jogo.fasesCompletas.length}/5</p>`;
+                html += `<p><strong>Elementos Investigados:</strong> ${jogo.elementosInvestigados.length}</p>`;
+                html += '<h4 style="margin-top: 20px;">Camadas Visitadas:</h4><ul>';
+                jogo.fasesCompletas.forEach(fase => {
+                    html += `<li>${camadasTerra[fase].nome}</li>`;
+                });
+                html += '</ul>';
+                conteudo.innerHTML = html;
+            } else if (abaAtiva === 'amostras') {
+                let html = '<h3>🔬 Amostras Coletadas</h3>';
+                if (jogo.amostras.length === 0) {
+                    html += '<p>Nenhuma amostra coletada ainda. Continue investigando!</p>';
+                } else {
+                    jogo.amostras.forEach(amostra => {
+                        html += `
+                            <div class="amostra-item">
+                                <h4>${amostra.emoji} ${amostra.nome}</h4>
+                                <p><strong>Formação:</strong> ${amostra.formacao}</p>
+                                <p><strong>Exemplos:</strong> ${amostra.exemplos.join(', ')}</p>
+                                <p><strong>Contém fósseis:</strong> ${amostra.temFosseis ? 'Sim ✓' : 'Não'}</p>
+                            </div>
+                        `;
+                    });
+                }
+                html += '<h4 style="margin-top: 30px;">🦕 Fósseis Coletados</h4>';
+                if (jogo.fosseis.length === 0) {
+                    html += '<p>Nenhum fóssil coletado ainda. Procure em rochas sedimentares!</p>';
+                } else {
+                    jogo.fosseis.forEach(fossil => {
+                        html += `
+                            <div class="amostra-item">
+                                <h4>${fossil.emoji} ${fossil.nome}</h4>
+                                <p><strong>Tipo:</strong> ${fossil.tipo}</p>
+                                <p><strong>Período:</strong> ${fossil.periodo}</p>
+                                <p><strong>Local:</strong> ${fossil.local}</p>
+                                <p>${fossil.info}</p>
+                            </div>
+                        `;
+                    });
+                }
+                conteudo.innerHTML = html;
+            } else if (abaAtiva === 'mapa') {
+                let html = '<h3>🗺️ Mapa das Camadas</h3>';
+                html += '<div style="text-align: center; margin: 20px 0;">';
+                for (let i = 1; i <= 5; i++) {
+                    const fase = camadasTerra[i];
+                    const completa = jogo.fasesCompletas.includes(i);
+                    html += `
+                        <div style="padding: 20px; margin: 10px 0; background: ${fase.cor}; color: white; border-radius: 8px; ${completa ? 'border: 3px solid var(--success-color);' : ''}">
+                            <h4>${completa ? '✓' : ''} ${fase.nome}</h4>
+                            <p>${fase.profundidade} | ${fase.temperatura}</p>
+                        </div>
+                    `;
+                }
+                html += '</div>';
+                conteudo.innerHTML = html;
+            } else if (abaAtiva === 'glossario') {
+                let html = '<h3>📚 Glossário Científico</h3>';
+                html += `
+                    <div class="amostra-item">
+                        <h4>🌍 Crosta Terrestre</h4>
+                        <p>A camada mais externa e fina da Terra, onde vivemos.</p>
+                    </div>
+                    <div class="amostra-item">
+                        <h4>🌋 Manto</h4>
+                        <p>Camada intermediária, mais espessa, onde rochas se movem e se transformam.</p>
+                    </div>
+                    <div class="amostra-item">
+                        <h4>💎 Núcleo</h4>
+                        <p>Camada mais interna, formada por ferro e níquel. Cria o campo magnético.</p>
+                    </div>
+                    <div class="amostra-item">
+                        <h4>🪨 Rocha Sedimentar</h4>
+                        <p>Formada por acúmulo de sedimentos. ÚNICA rocha que contém fósseis!</p>
+                    </div>
+                    <div class="amostra-item">
+                        <h4>🪨 Rocha Metamórfica</h4>
+                        <p>Formada quando outras rochas sofrem transformações por calor e pressão.</p>
+                    </div>
+                    <div class="amostra-item">
+                        <h4>🪨 Rocha Magmática</h4>
+                        <p>Formada quando o magma esfria e endurece.</p>
+                    </div>
+                    <div class="amostra-item">
+                        <h4>🦕 Fóssil</h4>
+                        <p>Restos ou vestígios de seres vivos antigos preservados em rochas sedimentares.</p>
+                    </div>
+                    <div class="amostra-item">
+                        <h4>🧲 Campo Magnético</h4>
+                        <p>Campo criado pelo núcleo externo que protege a Terra dos ventos solares.</p>
+                    </div>
+                `;
+                conteudo.innerHTML = html;
+            }
+        }
+
+        // Sistema de Progresso
+        function atualizarProgresso() {
+            const totalElementos = 20; // Aproximado
+            const elementosInvestigados = jogo.elementosInvestigados.length;
+            const fasesCompletas = jogo.fasesCompletas.length;
+            const progresso = Math.round(((fasesCompletas * 20) + (elementosInvestigados * 2)) / 100 * 100);
+            
+            jogo.progresso = Math.min(progresso, 100);
+            document.getElementById('progresso-bar').style.width = jogo.progresso + '%';
+            document.getElementById('progresso-bar').textContent = jogo.progresso + '%';
+        }
+
+        function adicionarConquista(nome) {
+            if (!jogo.conquistas.includes(nome)) {
+                jogo.conquistas.push(nome);
+                mostrarFeedback("🏆 Conquista desbloqueada: " + nome);
+                salvarProgresso();
+            }
+        }
+
+        // Sistema de Salvamento
+        function salvarProgresso() {
+            localStorage.setItem('viagemCentroTerra', JSON.stringify(jogo));
+        }
+
+        function carregarJogoSalvo() {
+            const salvo = localStorage.getItem('viagemCentroTerra');
+            if (salvo) {
+                jogo = JSON.parse(salvo);
+                document.getElementById('menu-inicial').classList.remove('ativa');
+                document.getElementById('jogo').classList.add('ativa');
+                atualizarHUD();
+                mostrarFase(jogo.faseAtual);
+            }
+        }
+
+        function recomecarJogo() {
+            if (confirm('Tem certeza que deseja apagar todo o progresso e começar de novo?')) {
+                localStorage.removeItem('viagemCentroTerra');
+                location.reload();
+            }
+        }
+
+        // Acessibilidade
+        function abrirOpcoes() {
+            document.getElementById('modal-opcoes').classList.add('ativo');
+        }
+
+        function fecharOpcoes() {
+            document.getElementById('modal-opcoes').classList.remove('ativo');
+        }
+
+        function toggleAltoContraste() {
+            document.body.classList.toggle('alto-contraste');
+            salvarProgresso();
+        }
+
+        function ajustarFonte(tamanho) {
+            document.body.className = document.body.className.replace(/fonte-\w+/g, '');
+            if (tamanho !== 'media') {
+                document.body.classList.add('fonte-' + tamanho);
+            }
+            salvarProgresso();
+        }
+
+        function fecharQuiz() {
+            document.getElementById('modal-quiz').classList.remove('ativo');
+        }
+
+        // Fechar modais com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                fecharDiario();
+                fecharQuiz();
+                fecharOpcoes();
+            }
+        });
+
+        // Inicialização
+        window.onload = function() {
+            const salvo = localStorage.getItem('viagemCentroTerra');
+            if (salvo) {
+                document.getElementById('btn-continuar').style.display = 'inline-block';
+            }
+            
+            // Carregar preferências
+            const preferencias = localStorage.getItem('preferencias');
+            if (preferencias) {
+                const pref = JSON.parse(preferencias);
+                if (pref.altoContraste) {
+                    document.body.classList.add('alto-contraste');
+                    document.getElementById('toggle-contraste').checked = true;
+                }
+                if (pref.fonte) {
+                    ajustarFonte(pref.fonte);
+                }
+            }
+        };
+
+        // Salvar preferências
+        document.getElementById('toggle-contraste')?.addEventListener('change', function() {
+            const preferencias = {
+                altoContraste: this.checked,
+                fonte: document.body.className.match(/fonte-(\w+)/)?.[1] || 'media'
+            };
+            localStorage.setItem('preferencias', JSON.stringify(preferencias));
+        });
+    </script>
+</body>
+</html>
+
+
