@@ -1153,7 +1153,28 @@
 
             const modal = document.getElementById('modal-quiz');
             const conteudo = document.getElementById('quiz-conteudo');
-            
+            // Rodízio determinístico das opções: cada vez que abrir o desafio,
+            // a posição das opções é deslocada (offset) por fase para evitar padrões.
+            if (!jogo.quizOffsets) jogo.quizOffsets = {};
+            const opcoesOriginais = quiz.opcoes;
+            const nOpcoes = opcoesOriginais.length;
+            const offsetAtual = jogo.quizOffsets[numeroFase] ?? 0;
+
+            // Gera uma nova ordem rotacionada sem perder a propriedade `correta`
+            const opcoesRotacionadas = [];
+            for (let i = 0; i < nOpcoes; i++) {
+                const origIndex = (i + offsetAtual) % nOpcoes;
+                // copiar objeto para não criar referências inesperadas
+                opcoesRotacionadas.push(Object.assign({}, opcoesOriginais[origIndex]));
+            }
+
+            // Atualiza o quiz para a versão rotacionada (usado por responderQuiz)
+            quiz.opcoes = opcoesRotacionadas;
+
+            // Incrementa o offset para a próxima vez (rodízio)
+            jogo.quizOffsets[numeroFase] = (offsetAtual + 1) % nOpcoes;
+            salvarProgresso();
+
             let html = `
                 <h2>🎯 Desafio da Fase ${numeroFase}</h2>
                 <div class="quiz-pergunta">${quiz.pergunta}</div>
